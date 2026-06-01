@@ -1,0 +1,6 @@
+{
+  "name": "LuxeDeco Cameroon",
+  "description": "Cameroon's premium digital marketplace for luxury interior decoration and finishing materials.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
