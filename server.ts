@@ -47,7 +47,7 @@ async function setupDatabase() {
     console.log("Testing database connection...");
     await pool.query('SELECT 1');
     console.log("Running automatic database updates...");
-    
+
     // Create Categories Table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS categories (
@@ -165,13 +165,13 @@ async function setupDatabase() {
 async function startServer() {
   await setupDatabase();
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
   app.use(express.json({ limit: '50mb' }));
   app.use(cookieParser());
 
   // API ROUTES
-  
+
   // Auth API
   app.post("/api/login", (req, res) => {
     const { username, password } = req.body;
@@ -187,7 +187,7 @@ async function startServer() {
     res.clearCookie('admin_token');
     return res.json({ success: true });
   });
-  
+
   app.get("/api/auth/check", authenticateAdmin, (req, res) => {
     return res.json({ authenticated: true });
   });
@@ -197,7 +197,7 @@ async function startServer() {
     if (pool) {
       try {
         const [rows]: any = await pool.query('SELECT * FROM products');
-        
+
         // MySQL JSON parsing mapping
         const parsed = rows.map((r: any) => ({
           ...r,
@@ -207,7 +207,7 @@ async function startServer() {
           imageUrls: typeof r.imageUrls === 'string' ? JSON.parse(r.imageUrls) : (r.imageUrls || []),
           specifications: typeof r.specifications === 'string' ? JSON.parse(r.specifications) : (r.specifications || [])
         }));
-        
+
         return res.json(parsed);
       } catch (err) {
         console.error("Database error fetching products:", err);
@@ -223,7 +223,7 @@ async function startServer() {
     try {
       const { image } = req.body;
       if (!image) return res.status(400).json({ error: "No image provided" });
-      
+
       // We will store the base64 image data directly to avoid ephemeral file storage issues in container
       return res.json({ url: image });
     } catch (err) {
@@ -313,7 +313,7 @@ async function startServer() {
     }
     res.json(suppliers);
   });
-  
+
   // Reviews API
   app.get("/api/reviews", async (req, res) => {
     if (pool) {
@@ -335,7 +335,7 @@ async function startServer() {
   app.use('/uploads', express.static(uploadsPath));
 
   // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV == "development") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -350,7 +350,7 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on port:${PORT}`);
   });
 }
 
